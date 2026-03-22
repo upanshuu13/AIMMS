@@ -1,29 +1,40 @@
-const fs = require("fs");
-
-const LOG_FILE = "/var/log/auth.log";
+const { spawn } = require("child_process");
+const axios = require("axios");
 
 console.log("Monitoring auth.log...");
 
-fs.watchFile(LOG_FILE, (curr, prev) => {
+// Use tail -F for real-time log tracking (better than fs.watchFile)
+const tail = spawn("tail", ["-F", "/var/log/auth.log"]);
 
-    const stream = fs.createReadStream(LOG_FILE, {
-        start: prev.size,
-        end: curr.size
-    });
+tail.stdout.on("data", async (data) => {
 
-    stream.on("data", data => {
+    const lines = data.toString().split("\n");
 
-        const lines = data.toString().split("\n");
+    for (let line of lines) {
 
-        lines.forEach(line => {
+        if (line.includes("Failed password")) {
 
-            if(line.includes("Failed password")){
-                console.log("Failed login detected:");
-                console.log(line);
+            const ipMatch = line.match(/from (\d+\.\d+\.\d+\.\d+)/);
+            const userMatch = line.match(/user (\w+)/);
+
+            const ip = ipMatch ? ipMatch[1] : "unknown";
+            const user = userMatch ? userMatch[1] : "unknown";
+
+            const event = {
+                event_type: "failed_login",
+                source_ip: ip,
+                username: user,
+                message: line
+            };
+
+            console.log("⚠️ Event detected:", event);
+
+            try {
+                await axios.post("http://localhost:3000/event", event);
+                console.log("✅ Event sent to backend");
+            } catch (err) {
+                console.log("❌ Failed to send event");
             }
-
-        });
-
-    });
-
+        }
+    }
 });
