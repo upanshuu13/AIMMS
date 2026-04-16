@@ -7,7 +7,7 @@
 
 const express = require('express');
 const router  = express.Router();
-const db      = require('../db');   // your existing MySQL connection/pool
+const db      = require('../database/db');   // your existing MySQL connection/pool
 
 /**
  * POST /api/network-event
