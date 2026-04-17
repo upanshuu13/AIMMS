@@ -36,7 +36,7 @@ app.post("/event", (req, res) => {
 // =========================
 // NETWORK EVENTS (Day 4)
 // =========================
-app.use("/api/network-events", networkRoutes);
+app.use("/api", networkRoutes);
 
 // =========================
 // INCIDENTS (Day 5)
