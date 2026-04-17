@@ -3,7 +3,7 @@ const db = require("../database/db");
 
 // ROUTES
 const networkRoutes = require("./routes_networkEvents");
-// const incidentRoutes = require("./routes_incidents"); // enable after Day 5 is ready
+const incidentRoutes = require("./routes_incidents");
 
 const app = express();
 
@@ -15,6 +15,10 @@ app.use(express.json());
 app.post("/event", (req, res) => {
   const { event_type, source_ip, username, message } = req.body;
 
+  if (!event_type || !source_ip) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
   const query = `
     INSERT INTO events (event_type, source_ip, username, message)
     VALUES (?, ?, ?, ?)
@@ -22,12 +26,12 @@ app.post("/event", (req, res) => {
 
   db.query(query, [event_type, source_ip, username, message], (err) => {
     if (err) {
-      console.error("DB Error:", err);
+      console.error("DB Error:", err.message);
       return res.status(500).send("Database error");
     }
 
-    console.log("Event stored:", event_type, source_ip);
-    res.send("Event stored");
+    console.log(`Event stored → ${event_type} from ${source_ip}`);
+    res.json({ message: "Event stored" });
   });
 });
 
@@ -39,8 +43,7 @@ app.use("/api", networkRoutes);
 // =========================
 // INCIDENTS (Day 5)
 // =========================
-// Keep disabled until rule engine + routes are verified
-// app.use("/api", incidentRoutes);
+app.use("/api", incidentRoutes);
 
 // =========================
 // HEALTH CHECK
@@ -53,13 +56,15 @@ app.get("/", (req, res) => {
 // ERROR HANDLER
 // =========================
 app.use((err, req, res, next) => {
-  console.error("Unhandled Error:", err);
-  res.status(500).send("Something went wrong");
+  console.error("Unhandled Error:", err.message);
+  res.status(500).json({ error: "Something went wrong" });
 });
 
 // =========================
 // START SERVER
 // =========================
-app.listen(3000, () => {
-  console.log("AIMMS backend running on port 3000");
+const PORT = 3000;
+
+app.listen(PORT, () => {
+  console.log(`AIMMS backend running on port ${PORT}`);
 });
