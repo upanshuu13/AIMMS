@@ -36,15 +36,14 @@ app.post("/event", (req, res) => {
 // =========================
 // NETWORK EVENTS (Day 4)
 // =========================
-app.use("/api/network-events", networkRoutes);
+app.use("/api", networkRoutes);
 
 // =========================
 // INCIDENTS (Day 5)
 // =========================
 // app.use("/api/incidents", incidentRoutes);
 
-// =========================
-// HEALTH CHECK (optional)
+// =========================// HEALTH CHECK (optional)
 // =========================
 app.get("/", (req, res) => {
   res.send("AIMMS Backend Running");

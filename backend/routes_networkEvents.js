@@ -8,40 +8,44 @@
 const express = require('express');
 const router  = express.Router();
 const db      = require('../database/db');   // your existing MySQL connection/pool
-
 /**
  * POST /api/network-event
  * Body: { events: [ { source_ip, dest_ip, port, protocol, timestamp } ] }
  * Called by sniffer.py in batches
  */
-router.post('/network-event', async (req, res) => {
-    const { events } = req.body;
-
-    if (!Array.isArray(events) || events.length === 0) {
-        return res.status(400).json({ error: 'events array required' });
-    }
-
-    // Build a multi-row INSERT for efficiency
-    const values = events.map(e => [
-        e.source_ip  || 'unknown',
-        e.dest_ip    || null,
-        e.port       || null,
-        e.protocol   || 'OTHER',
-        e.timestamp  || new Date().toISOString().slice(0, 19).replace('T', ' ')
-    ]);
-
-    const sql = `
-        INSERT INTO network_events (source_ip, dest_ip, port, protocol, timestamp)
-        VALUES ?
-    `;
-
+router.post("/network-event", async (req, res) => {
     try {
+        const events = req.body.events;
+
+        if (!events || !Array.isArray(events)) {
+            return res.status(400).json({ error: "events array required" });
+        }
+
+        // ✅ Correct values mapping
+        const values = events.map(e => [
+            e.src_ip,
+            e.dst_ip,
+            e.src_port,
+            e.dst_port,
+            e.protocol,
+            e.length
+        ]);
+
+        // ✅ Correct SQL (matches packets table exactly)
+        const sql = `
+            INSERT INTO packets (src_ip, dst_ip, src_port, dst_port, protocol, length)
+            VALUES ?
+        `;
+
+        // ✅ Execute query
         await db.query(sql, [values]);
-        console.log(`[network-event] stored ${events.length} events`);
-        return res.json({ stored: events.length });
+
+        console.log("Inserted:", values.length);
+        res.json({ stored: values.length });
+
     } catch (err) {
-        console.error('[network-event] DB error:', err.message);
-        return res.status(500).json({ error: 'db insert failed' });
+        console.error("DB ERROR:", err);  // 👈 IMPORTANT
+        res.status(500).json({ error: "db insert failed" });
     }
 });
 
