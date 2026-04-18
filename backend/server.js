@@ -12,27 +12,28 @@ app.use(express.json());
 // =========================
 // EVENT INGESTION API (Day 1)
 // =========================
-app.post("/event", (req, res) => {
-  const { event_type, source_ip, username, message } = req.body;
+app.post("/event", async (req, res) => {
+  try {
+    const { event_type, source_ip, username, message } = req.body;
 
-  if (!event_type || !source_ip) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
-
-  const query = `
-    INSERT INTO events (event_type, source_ip, username, message)
-    VALUES (?, ?, ?, ?)
-  `;
-
-  db.query(query, [event_type, source_ip, username, message], (err) => {
-    if (err) {
-      console.error("DB Error:", err.message);
-      return res.status(500).send("Database error");
+    if (!event_type || !source_ip) {
+      return res.status(400).json({ error: "Missing required fields" });
     }
 
+    await db.query(
+      `INSERT INTO events (event_type, source_ip, username, message)
+       VALUES (?, ?, ?, ?)`,
+      [event_type, source_ip, username, message]
+    );
+
     console.log(`Event stored → ${event_type} from ${source_ip}`);
+
     res.json({ message: "Event stored" });
-  });
+
+  } catch (err) {
+    console.error("DB Error:", err);
+    res.status(500).json({ error: "Database error" });
+  }
 });
 
 // =========================
