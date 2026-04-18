@@ -1,17 +1,14 @@
 const express = require("express");
 const db = require("../database/db");
 
-// ROUTES
 const networkRoutes = require("./routes_networkEvents");
 const incidentRoutes = require("./routes_incidents");
+const profileRoutes = require("../day6-behavioral-profiling/routes_profiles");
 
 const app = express();
 
 app.use(express.json());
 
-// =========================
-// EVENT INGESTION API (Day 1)
-// =========================
 app.post("/event", async (req, res) => {
   try {
     const { event_type, source_ip, username, message } = req.body;
@@ -36,34 +33,19 @@ app.post("/event", async (req, res) => {
   }
 });
 
-// =========================
-// NETWORK EVENTS (Day 4)
-// =========================
 app.use("/api", networkRoutes);
-
-// =========================
-// INCIDENTS (Day 5)
-// =========================
 app.use("/api", incidentRoutes);
+app.use("/api", profileRoutes);
 
-// =========================
-// HEALTH CHECK
-// =========================
 app.get("/", (req, res) => {
   res.send("AIMMS Backend Running");
 });
 
-// =========================
-// ERROR HANDLER
-// =========================
 app.use((err, req, res, next) => {
   console.error("Unhandled Error:", err.message);
   res.status(500).json({ error: "Something went wrong" });
 });
 
-// =========================
-// START SERVER
-// =========================
 const PORT = 3000;
 
 app.listen(PORT, () => {
