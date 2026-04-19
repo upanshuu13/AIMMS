@@ -5,6 +5,7 @@ const networkRoutes = require("./routes_networkEvents");
 const incidentRoutes = require("./routes_incidents");
 const profileRoutes = require("../behavioral-profiling/routes_profiles");
 const riskRoutes = require("../risk-scoring/routes_riskScores");
+const mitigationRoutes = require("../mitigation/routes_mitigation");
 
 
 const app = express();
@@ -39,6 +40,7 @@ app.use("/api", networkRoutes);
 app.use("/api", incidentRoutes);
 app.use("/api", profileRoutes);
 app.use("/api", riskRoutes);
+app.use("/api", mitigationRoutes);
 
 app.get("/", (req, res) => {
   res.send("AIMMS Backend Running");
