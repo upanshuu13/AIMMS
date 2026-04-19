@@ -3,7 +3,7 @@ const db = require("../database/db");
 
 const networkRoutes = require("./routes_networkEvents");
 const incidentRoutes = require("./routes_incidents");
-const profileRoutes = require("../day6-behavioral-profiling/routes_profiles");
+const profileRoutes = require("../behavioral-profiling/routes_profiles");
 
 const app = express();
 
