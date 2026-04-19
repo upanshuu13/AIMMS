@@ -4,6 +4,8 @@ const db = require("../database/db");
 const networkRoutes = require("./routes_networkEvents");
 const incidentRoutes = require("./routes_incidents");
 const profileRoutes = require("../behavioral-profiling/routes_profiles");
+const riskRoutes = require("../risk-scoring/routes_riskScores");
+
 
 const app = express();
 
@@ -36,6 +38,7 @@ app.post("/event", async (req, res) => {
 app.use("/api", networkRoutes);
 app.use("/api", incidentRoutes);
 app.use("/api", profileRoutes);
+app.use("/api", riskRoutes);
 
 app.get("/", (req, res) => {
   res.send("AIMMS Backend Running");
