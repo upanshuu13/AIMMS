@@ -96,7 +96,7 @@ async function testBruteForce() {
 
     // Run hydra in background, kill after 30s
     const hydraProc = exec(
-        'hydra -l root -P /usr/share/wordlists/rockyou.txt ssh://127.0.0.1 -t 2',
+        'hydra -l root -P /home/smita/Desktop/rockyou.txt ssh://127.0.0.1 -t 2',
         { stdio: 'ignore' }
     );
 
